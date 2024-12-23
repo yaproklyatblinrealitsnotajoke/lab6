@@ -1,0 +1,30 @@
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+public class Validator {
+    public static void validate(Object target, Class<?> testClass) throws ValidationException {
+        if (target == null || testClass == null) {
+            throw new IllegalArgumentException("объект и тест-класс не может быть null.");
+        }
+
+        Method[] testMethods = testClass.getDeclaredMethods();
+        for (Method testMethod : testMethods) {
+            if (testMethod.getParameterCount() == 1 && testMethod.getParameterTypes()[0].isAssignableFrom(target.getClass())) {
+                try {
+                    testMethod.invoke(null, target);
+                } catch (InvocationTargetException e) {
+                    if (e.getTargetException() instanceof ValidationException) {
+                        throw (ValidationException) e.getTargetException();
+                    } else {
+                        throw new ValidationException("Тест метод '" + testMethod.getName() + "' провален: " + e.getTargetException().getMessage(), e.getTargetException());
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new ValidationException("Тест метод '" + testMethod.getName() + "', нет доступа", e);
+                } catch (IllegalArgumentException e) {
+                    throw new ValidationException("Тест метод '" + testMethod.getName() + "' не подходящий тип аргумента", e);
+                }
+
+            }
+        }
+    }
+}

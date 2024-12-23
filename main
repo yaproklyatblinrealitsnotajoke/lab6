@@ -1,0 +1,182 @@
+import java.util.Scanner;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Date;
+public class Main {
+    public static void main(String[] args) {
+        Main m = new Main();
+        Scanner in = new Scanner(System.in);
+
+        System.out.println("Задание 1");
+        Human validHuman = new Human("Алиса", 30);
+        Human invalidHuman = new Human("Петя", -5);
+        Human invalidHuman2 = new Human("Катя1", 5);
+
+        try {
+            Validator.validate(validHuman, HumanValidator.class);
+        } catch (ValidationException e) {
+            System.err.println("Проверка провалена: " + e.getMessage());
+        }
+
+
+        try {
+            Validator.validate(invalidHuman, HumanValidator.class);
+        } catch (ValidationException e) {
+            System.err.println("Проверка провалена: " + e.getMessage());
+        }
+
+        try {
+            Validator.validate(invalidHuman2, HumanValidator.class);
+        } catch (ValidationException e) {
+            System.err.println("Проверка провалена: " + e.getMessage());
+        }
+
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 2.1");
+        MyClass obj = new MyClass();
+
+        for (java.lang.reflect.Method method : obj.getClass().getDeclaredMethods()) {
+            if (method.isAnnotationPresent(Invoke.class)) {
+                System.out.println("Метод '" + method.getName() + "' имеет аннотацию @Invoke.");
+                try {
+                    method.invoke(obj);
+                } catch (Exception ex) {
+                    System.out.println("Не удалось вызвать метод");
+                    ex.printStackTrace();
+                }
+
+            } else {
+                System.out.println("Метод '" + method.getName() + "' не имеет аннотацию @Invoke.");
+            }
+        }
+        obj.myRegularMethod(); // вызываем обычный метод для примера
+
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 2.2");
+        Class<?> myClass = MyClass.class;
+
+        //Проверяем аннотацию на классе
+        if (myClass.isAnnotationPresent(Default.class)) {
+            Default defaultAnnotation = myClass.getAnnotation(Default.class);
+            Class<?> defaultClass = defaultAnnotation.value();
+
+            System.out.println("Стандартный класс для MyClass: " + defaultClass.getName());
+        }
+
+        //Проверяем аннотацию на поле name
+        try {
+            java.lang.reflect.Field field = myClass.getDeclaredField("name");
+
+            if (field.isAnnotationPresent(Default.class)) {
+                Default defaultAnnotation = field.getAnnotation(Default.class);
+                Class<?> defaultClass = defaultAnnotation.value();
+
+                System.out.println("Стандартный класс для name: " + defaultClass.getName());
+            }
+
+        } catch (NoSuchFieldException e) {
+            System.out.println("Поле 'name' не найдено: " + e.getMessage());
+        }
+
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 2.3");
+        Person person = new Person("Паша", 30);
+
+        ToString classAnnotation = Person.class.getAnnotation(ToString.class);
+        if (classAnnotation != null) {
+            System.out.println("Аннотация класса ToString: value = " + classAnnotation.value());
+        }
+
+        try {
+            java.lang.reflect.Field nameField = Person.class.getDeclaredField("name");
+            ToString fieldAnnotation = nameField.getAnnotation(ToString.class);
+            if (fieldAnnotation != null) {
+                System.out.println("Аннотация поля name: value = " + fieldAnnotation.value());
+            }
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Name:" + person.getName() + ", Age: "+person.getAge());
+
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 2.4");
+        MyData data = new MyData(1, "Test");
+        Class<?> myDataClass = data.getClass();
+
+        if (myDataClass.isAnnotationPresent(Validate.class)) {
+            Validate validateAnnotation =  myDataClass.getAnnotation(Validate.class);
+            Class<?>[] validators = validateAnnotation.value();
+            System.out.println("У класса "+ myDataClass.getName() +" есть аннотация @Validate с валидаторами: " + Arrays.toString(validators));
+
+            for(Class<?> validatorClass : validators) {
+                try {
+                    Object validatorInstance = validatorClass.getDeclaredConstructor().newInstance();
+                    Method isValidMethod = validatorClass.getMethod("isValid", Object.class);
+                    boolean result = (Boolean) isValidMethod.invoke(validatorInstance, data);
+                    if(!result) {
+                        System.out.println("Data is invalid, by " + validatorClass.getName());
+                    }
+
+
+                } catch (Exception e) {
+                    System.err.println("Error creating or invoking validator " + validatorClass.getName());
+                    e.printStackTrace();
+                }
+
+            }
+
+        } else {
+            System.out.println("У класса "+ myDataClass.getName() +" нет аннотации @Validate");
+        }
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 2.5");
+        Class<?> clazz = MyClass2.class;
+        if(clazz.isAnnotationPresent(Two.class)){
+            Two annotation = clazz.getAnnotation(Two.class);
+            System.out.println("Значение first:" + annotation.first());
+            System.out.println("Значение second:" + annotation.second());
+        } else {
+            System.out.println("Аннотация @Two отсутствует у класса " + clazz.getName());
+        }
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 2.6");
+        Class<UserProfileService> userProfileClass = UserProfileService.class;
+        if (userProfileClass.isAnnotationPresent(Cache.class)) {
+            Cache cacheAnnotation = userProfileClass.getAnnotation(Cache.class);
+            String[] cacheKeys = cacheAnnotation.value();
+            System.out.println("Аннотация @Cache присутствует в классе " + userProfileClass.getSimpleName());
+            System.out.println("Значение свойства value: " + java.util.Arrays.toString(cacheKeys));
+        }
+
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Задание 3");
+
+
+    }
+
+}

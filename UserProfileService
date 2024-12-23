@@ -1,0 +1,8 @@
+@Cache(value = {"user", "data", "profile"})
+public class UserProfileService {
+    // ... методы сервиса ...
+    public String getUserName(int userId){
+        //...
+        return "Test User";
+    }
+}

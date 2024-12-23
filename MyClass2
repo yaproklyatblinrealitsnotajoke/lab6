@@ -1,0 +1,12 @@
+@Two(first = "Значение первого свойства", second = 42)
+public class MyClass2 {
+    private String message;
+
+    public MyClass2(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}

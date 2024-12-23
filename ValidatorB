@@ -1,0 +1,7 @@
+class ValidatorB implements Valid{
+
+    public boolean isValid(Object obj) {
+        System.out.println("Validating with ValidatorA");
+        return true;
+    }
+}

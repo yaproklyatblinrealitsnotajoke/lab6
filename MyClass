@@ -1,0 +1,24 @@
+import java.util.Date;
+@Default(value = Date.class)
+public class MyClass {
+
+    @Default(value = String.class)
+    private String name;
+
+    public MyClass(String name) {
+        this.name = name;
+    }
+
+    public MyClass() {
+        this.name = "Default Name";
+    }
+
+    @Invoke
+    public void myInvokedMethod() {
+        System.out.println("Метод с аннотацией @Invoke вызван.");
+    }
+
+    public void myRegularMethod() {
+        System.out.println("Обычный метод вызван.");
+    }
+}

@@ -1,0 +1,3 @@
+interface Valid {
+    boolean isValid(Object obj);
+}

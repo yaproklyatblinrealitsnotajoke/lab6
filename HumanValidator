@@ -1,0 +1,17 @@
+public class HumanValidator {
+    public static void validateAge(Human human) throws ValidationException {
+        if ((human.age < 0)||(human.age>200)) {
+            throw new ValidationException("Неправильный возраст: " + human.age);
+        }
+    }
+
+    public static void validateName(Human human) throws ValidationException {
+        if (human.name == null || human.name.isEmpty()) {
+            throw new ValidationException("Имя не должно быть null");
+        }
+        if (!human.name.matches("[а-яА-ЯёЁ]+")) {
+            throw new ValidationException("Имя должно содержать только русские буквы");
+        }
+    }
+
+}
